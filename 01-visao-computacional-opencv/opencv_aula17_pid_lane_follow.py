@@ -22,6 +22,15 @@ arduino = serial.Serial(
 
 time.sleep(2)
 
+# -----------------------------------
+# CENTRALIZA SERVO
+# -----------------------------------
+
+arduino.write(b'90\n')
+
+# Espera servo estabilizar
+time.sleep(2)
+
 
 # -----------------------------------
 # VÍDEO

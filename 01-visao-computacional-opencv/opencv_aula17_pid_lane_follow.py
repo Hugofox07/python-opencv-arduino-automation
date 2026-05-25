@@ -24,12 +24,31 @@ time.sleep(2)
 
 
 # -----------------------------------
-# ABRE VÍDEO
+# VÍDEO
 # -----------------------------------
 
 video = cv.VideoCapture(
-     "souces\estrada3.mp4"
+    "souces/estrada3.mp4"
 )
+
+
+# -----------------------------------
+# PID
+# -----------------------------------
+
+# Ganho proporcional
+Kp = 0.15
+
+# Ganho derivativo
+Kd = 0.08
+
+# Ganho integral
+Ki = 0.0005
+
+
+# Erros PID
+erro_anterior = 0
+erro_integral = 0
 
 
 # -----------------------------------
@@ -38,10 +57,8 @@ video = cv.VideoCapture(
 
 while True:
 
-    # Lê frame vídeo
     ret, frame = video.read()
 
-    # Se acabou vídeo
     if not ret:
         break
 
@@ -59,7 +76,7 @@ while True:
 
 
     # -----------------------------------
-    # REGIÃO INTERESSE
+    # ROI
     # -----------------------------------
 
     roi = frame[
@@ -90,12 +107,11 @@ while True:
 
     upper_white = np.array([
         180,
-        50,
+        60,
         255
     ])
 
 
-    # Máscara
     mask = cv.inRange(
         hsv,
         lower_white,
@@ -104,7 +120,7 @@ while True:
 
 
     # -----------------------------------
-    # REMOVE RUÍDOS
+    # FILTROS
     # -----------------------------------
 
     mask = cv.GaussianBlur(
@@ -137,12 +153,12 @@ while True:
     )
 
 
-    # Servo padrão
+    # Centro servo
     angulo = 90
 
 
     # -----------------------------------
-    # DETECTOU FAIXA
+    # SE ENCONTROU FAIXA
     # -----------------------------------
 
     if len(contours) > 0:
@@ -158,8 +174,13 @@ while True:
 
         if area > 1000:
 
-            # Centro faixa
-            M = cv.moments(largest)
+            # -----------------------------------
+            # MOMENTOS
+            # -----------------------------------
+
+            M = cv.moments(
+                largest
+            )
 
             if M["m00"] != 0:
 
@@ -184,23 +205,68 @@ while True:
                     -1
                 )
 
+                # Linha centro tela
+                cv.line(
+                    roi,
+                    (largura // 2, 0),
+                    (largura // 2, roi.shape[0]),
+                    (255, 0, 0),
+                    2
+                )
+
 
                 # -----------------------------------
-                # CONVERTE PARA ÂNGULO
+                # ERRO
+                # -----------------------------------
+
+                erro = cx - (largura // 2)
+
+
+                # -----------------------------------
+                # PID
+                # -----------------------------------
+
+                # Proporcional
+                proporcional = erro
+
+                # Integral
+                erro_integral += erro
+
+                # Derivativo
+                derivativo = (
+                    erro - erro_anterior
+                )
+
+                # Saída PID
+                pid = (
+                    (Kp * proporcional)
+                    +
+                    (Ki * erro_integral)
+                    +
+                    (Kd * derivativo)
+                )
+
+                # Atualiza erro
+                erro_anterior = erro
+
+
+                # -----------------------------------
+                # SERVO
                 # -----------------------------------
 
                 angulo = int(
-                    (cx * 180) / largura
+                    90 + pid
                 )
 
+                # Limites
                 angulo = max(
-                    40,
-                    min(140, angulo)
+                    50,
+                    min(130, angulo)
                 )
 
 
     # -----------------------------------
-    # ENVIA SERVO
+    # ENVIA SERIAL
     # -----------------------------------
 
     comando = f"{angulo}\n"
@@ -211,7 +277,7 @@ while True:
 
 
     # -----------------------------------
-    # TEXTO
+    # TEXOS
     # -----------------------------------
 
     cv.putText(
@@ -224,9 +290,19 @@ while True:
         2
     )
 
+    cv.putText(
+        frame,
+        f'PID',
+        (20, 80),
+        cv.FONT_HERSHEY_SIMPLEX,
+        1,
+        (0, 255, 255),
+        2
+    )
+
 
     # -----------------------------------
-    # MOSTRA
+    # JANELAS
     # -----------------------------------
 
     cv.imshow(
@@ -235,13 +311,13 @@ while True:
     )
 
     cv.imshow(
-        "Video Lane Following",
+        "PID Lane Following",
         frame
     )
 
 
     # -----------------------------------
-    # VELOCIDADE VÍDEO
+    # VELOCIDADE
     # -----------------------------------
 
     if cv.waitKey(30) == ord('q'):

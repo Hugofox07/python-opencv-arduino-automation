@@ -16,7 +16,7 @@ import time
 # -----------------------------------
 
 arduino = serial.Serial(
-    'COM3',
+    'COM4',
     9600
 )
 

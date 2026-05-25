@@ -39,7 +39,7 @@ time.sleep(2)
 # -----------------------------------
 
 video = cv.VideoCapture(
-    "souces/estrada1.mp4"
+    "souces/estrada2.mp4"
 )
 
 

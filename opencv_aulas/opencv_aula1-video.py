@@ -1,6 +1,6 @@
 import cv2 as cv
 
-cap = cv.VideoCapture("imagens/video.mp4")
+cap = cv.VideoCapture("sources/estrada1.mp4")
 
 while True:
     ret, frame = cap.read()

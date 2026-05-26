@@ -6,16 +6,18 @@ int angulo = 90;
 
 void setup()
 {
-    Serial.begin(9600);
+    Serial.begin(115200);
 
     meuServo.attach(9);
 
     meuServo.write(90);
+
+    delay(500);
 }
 
 void loop()
 {
-    if (Serial.available() > 0)
+    if (Serial.available())
     {
         angulo = Serial.parseInt();
 

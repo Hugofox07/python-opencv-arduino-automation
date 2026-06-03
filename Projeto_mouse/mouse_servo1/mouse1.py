@@ -6,7 +6,7 @@ import time
 # SERIAL
 # ==========================================
 
-arduino = serial.Serial('COM4', 115200)
+arduino = serial.Serial('COM5', 115200)
 
 time.sleep(2)
 

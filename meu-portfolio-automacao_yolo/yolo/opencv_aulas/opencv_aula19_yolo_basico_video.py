@@ -35,7 +35,7 @@ model = YOLO(
 #cap = cv.VideoCapture(0)
 
 # Para vídeo:
-cap = cv.VideoCapture("sources/estrada3.mp4")
+cap = cv.VideoCapture("sources/highway.mp4")
      
  
 
